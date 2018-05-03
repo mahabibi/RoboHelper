@@ -1,0 +1,5 @@
+com\capbpm\robo\FileMetaData.class
+com\capbpm\robo\Reader.class
+com\capbpm\robo\FileSection.class
+com\capbpm\robo\Util.class
+com\capbpm\robo\IPDFTemplate.class
