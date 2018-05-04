@@ -4,15 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Iterator;
-
+import java.util.regex.Pattern;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 
 public class Util {
-
-	
 
 	public static ByteArrayOutputStream writeToPDF(String content) throws Exception {
 		InputStream fis = new ByteArrayInputStream(content.getBytes("UTF-8"));
@@ -34,24 +32,61 @@ public class Util {
 		return os;
 	}
 
-	
 	public static String constructHTML(FileMetaData fmd) {
 		String retval = "";
 
-		retval = IPDFTemplate.PREAMBLE.replaceAll("@@DOC_NAME@@", fmd.getFileName());
+		retval = IPDFTemplate.PREAMBLE.replace("@@DOC_NAME@@", fmd.getFileName());
+		
+		String htmlBody ="";
 
 		Iterator<FileSection> it = fmd.getSections().iterator();
+		int debug =0;
+		String allBodyText = "";
 		while (it.hasNext()) {
-			FileSection section = it.next();
-			String en = section.getEng();
-			String fr = section.getFr();
+			htmlBody="";
 
-			retval += IPDFTemplate.BODY.replaceAll("@@SECTION_NAME@@", section.getSectionName())
-					.replaceAll("@@ENG@@", en).replaceAll("@@FR@@", fr);
+			FileSection section = it.next();
+			String sName = section.getSectionName();
+			if (sName.startsWith("Manager, Trustee and Portfolio Advisor"))
+			{
+				debug = -1;
+			}
+			if (sName != null) {
+				String en = section.getEng();
+				String fr = section.getFr();
+				if (en == null) {
+					en = "";
+				}
+				if (fr == null) {
+					fr = "";
+				}
+
+				try
+				{
+					debug=1;
+					htmlBody = IPDFTemplate.BODY.replace("@@SECTION_NAME@@", Pattern.quote(sName));
+				debug=2;
+				htmlBody = htmlBody.replace("@@ENG@@", en);
+				debug=3;
+				htmlBody = htmlBody.replace("@@FR@@", fr);
+				debug=4;
+				}
+				catch(Exception e)
+				{
+//					if (debug==3)
+//					{
+//						htmlBody = htmlBody.replaceAll("@@FR@@", "");
+//					}
+					e.printStackTrace();
+				}
+
+			}
+			
+			allBodyText += htmlBody;
 
 		}
 
-		retval += IPDFTemplate.POST;
+		retval = retval +allBodyText + IPDFTemplate.POST;
 		return retval;
 	}
 }

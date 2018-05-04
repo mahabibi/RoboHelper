@@ -29,6 +29,8 @@ public class Reader {
 				baos.writeTo(outputStream);
 			}
 		}
+		
+		System.out.println("done");
 
 	}
 
@@ -48,16 +50,19 @@ public class Reader {
 		File[] files = inDir.listFiles();
 		if (files != null && files.length > 0) {
 			for (int i = 0; i < files.length; i++) {
-				String fName = files[i].getName();
-				if (fName.startsWith("in_")) {
-					System.out.println("about to load files");
-					FileMetaData currentFMD = getFileConentToFileMetaData(files[i]);
-					retval.add(currentFMD);
-
-					// clean up
-					String newFileName = files[i].getName().replaceFirst("in_", "done_").replaceFirst(".txt", "");
-					files[i].renameTo(new File(inDir,newFileName));
-				}
+				if (files[i].length()>0)
+				{	
+					String fName = files[i].getName();
+					if (fName.startsWith("in_")) {
+						System.out.println("about to load files");
+						FileMetaData currentFMD = getFileConentToFileMetaData(files[i]);
+						retval.add(currentFMD);
+	
+						// clean up
+						String newFileName = files[i].getName().replaceFirst("in_", "done_").replaceFirst(".txt", "");
+						files[i].renameTo(new File(inDir,newFileName));
+					}
+					}
 			}
 		}
 
@@ -72,16 +77,28 @@ public class Reader {
 		String[] sections = fileContent.split("/////@@@@@");
 
 		for (int i = 0; i < sections.length; i++) {
+			try {
 			if (sections[i] == null || sections[i].trim().equals("")) {
 				continue;
 			}
 			String[] sectionBody = sections[i].split("@@@@@");
+			String sBody = "";
+			
+			if (sectionBody.length==2 && sectionBody[1] !=null)
+			{
+				sBody = sectionBody[1];
+			}
 			FileSection fs = new FileSection();
 			fs.setSectionName(sectionBody[0]);
-			fs.setEng(sectionBody[1].trim());
+			fs.setEng( sBody.trim());
 			// fs.setFr(sectionBody[1]);
 			fs.setOrder(i);
 			retval.addSection(fs);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 
 		boolean isTrans = true;
@@ -116,11 +133,15 @@ public class Reader {
 		String url = "https://capbpmlab1.capbpm.com/translate/to/fr";
 
 		URL obj = new URL(url);
+		System.out.println( "processing " + fmd.getFileName());
 
 		List<FileSection> sections = fmd.getSections();
 
 		InputStream in = null;
-		for (int i = 0; i < sections.size(); i++) {
+		for (int i = 0; i < sections.size(); i++) {	
+			if (sections.get(i).getEng() !=null && !sections.get(i).getEng().trim().equals(""))
+			{
+			System.out.println(" before translation " + i + " of " + sections.size() + ":"+ sections.get(i).getSectionName());
 			HttpsURLConnection connection = (HttpsURLConnection) obj.openConnection();
 			connection.setDoOutput(true);
 			connection.setRequestMethod("POST");
@@ -130,11 +151,13 @@ public class Reader {
 
 			outputStream.write(sections.get(i).getEng().getBytes());
 			outputStream.flush();
-
+			System.out.println(" getting input stream");
 			in = connection.getInputStream();
+			System.out.println(" got response  stream");
 			String result = CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
 			sections.get(i).setFr(result);
 			in.close();
+			}
 		}
 	
 
