@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.regex.Pattern;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -64,7 +63,7 @@ public class Util {
 				try
 				{
 					debug=1;
-					htmlBody = IPDFTemplate.BODY.replace("@@SECTION_NAME@@", Pattern.quote(sName));
+					htmlBody = IPDFTemplate.BODY.replace("@@SECTION_NAME@@", sName);
 				debug=2;
 				htmlBody = htmlBody.replace("@@ENG@@", en);
 				debug=3;

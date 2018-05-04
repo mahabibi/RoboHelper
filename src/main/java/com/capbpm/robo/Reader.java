@@ -59,8 +59,8 @@ public class Reader {
 						retval.add(currentFMD);
 	
 						// clean up
-						String newFileName = files[i].getName().replaceFirst("in_", "done_").replaceFirst(".txt", "");
-						files[i].renameTo(new File(inDir,newFileName));
+						//String newFileName = files[i].getName().replaceFirst("in_", "done_").replaceFirst(".txt", "");
+						//files[i].renameTo(new File(inDir,newFileName));
 					}
 					}
 			}
